@@ -1,0 +1,67 @@
+// Task 1:
+
+SELECT 
+    *,
+    (SELECT o.customer_id 
+     FROM orders o 
+     WHERE o.order_id = od.order_id) AS customer_id
+FROM order_details od;
+
+// Task 2:
+
+SELECT *
+FROM order_details od
+WHERE od.order_id IN (
+    SELECT o.order_id 
+    FROM orders o 
+    WHERE o.shipper_id = 3
+);
+
+// Task 3:
+
+SELECT 
+    order_id,
+    AVG(quantity) AS avg_quantity
+FROM (
+    SELECT order_id, quantity
+    FROM order_details
+    WHERE quantity > 10
+) AS filtered_details
+GROUP BY order_id;
+
+// Task 4:
+
+WITH temp AS (
+    SELECT order_id, quantity
+    FROM order_details
+    WHERE quantity > 10
+)
+SELECT 
+    order_id,
+    AVG(quantity) AS avg_quantity
+FROM temp
+GROUP BY order_id;
+
+// Task 5:
+
+DROP FUNCTION IF EXISTS divide_numbers;
+
+DELIMITER //
+CREATE FUNCTION divide_numbers(num1 FLOAT, num2 FLOAT)
+RETURNS FLOAT
+DETERMINISTIC
+BEGIN
+    IF num2 = 0 THEN
+        RETURN NULL;
+    END IF;
+    RETURN num1 / num2;
+END //
+DELIMITER ;
+
+SELECT 
+    detail_id,
+    order_id,
+    product_id,
+    quantity,
+    divide_numbers(quantity, 2.5) AS divided_quantity
+FROM order_details;
